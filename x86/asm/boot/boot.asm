@@ -1,20 +1,20 @@
-[org 0x7C00]          ; BIOS loads bootloader here
+[org 0x7C00]         
 
 start:
-    mov ax, 0x1000    ; Load kernel to 0x1000:0000
+    mov ax, 0x1000 
     mov es, ax
     mov bx, 0x0000
 
-    mov ah, 0x02      ; BIOS: read sectors
-    mov al, 1         ; Read 1 sector
-    mov ch, 0         ; Cylinder
-    mov cl, 2         ; Sector (start at 2)
-    mov dh, 0         ; Head
-    mov dl, 0x80      ; First hard disk
+    mov ah, 0x02     
+    mov al, 1       
+    mov ch, 0       
+    mov cl, 2        
+    mov dh, 0       
+    mov dl, 0x80     
     int 0x13
-    jc no_kernel      ; If carry flag set, read failed
+    jc no_kernel    
 
-    jmp 0x1000:0000   ; Jump to kernel
+    jmp 0x1000:0000   
 
 no_kernel:
     mov si, msg
