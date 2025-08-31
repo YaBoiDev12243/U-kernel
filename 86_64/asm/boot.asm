@@ -23,7 +23,7 @@ start:
 [bits 32]
 protected_mode:
     mov eax, cr4
-    or eax, 1 << 5      ; Enable PAE
+    or eax, 1 << 5     
     mov cr4, eax
 
     mov eax, pml4_table
@@ -31,11 +31,11 @@ protected_mode:
 
     mov ecx, 0xC0000080
     rdmsr
-    or eax, 1 << 8      ; Enable long mode
+    or eax, 1 << 8      
     wrmsr
 
     mov eax, cr0
-    or eax, 0x80000000  ; Enable paging
+    or eax, 0x80000000 
     mov cr0, eax
 
     jmp 0x10:long_mode
@@ -47,7 +47,7 @@ protected_mode:
 long_mode:
     mov rsi, msg
     call print_string
-    jmp kernel_main     ; Jump to your C kernel
+    jmp kernel_main    
 
 print_string:
     mov rax, 0xB8000
@@ -68,8 +68,8 @@ msg db "Booting 64-bit kernel...", 0
 ; GDT setup
 gdt_start:
     dq 0x0000000000000000
-    dq 0x00AF9A000000FFFF ; Code segment
-    dq 0x00AF92000000FFFF ; Data segment
+    dq 0x00AF9A000000FFFF 
+    dq 0x00AF92000000FFFF 
 
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
