@@ -1,4 +1,4 @@
-#include "vga.h"
+#include "UVgaHandler.h"
 
 void kernel_main() {
     set_video_mode();
