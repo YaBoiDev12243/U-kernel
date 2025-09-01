@@ -1,62 +1,48 @@
-[org 0x7C00]         
+[org 0x7C00]      ; BIOS loads boot sector at 0x7C00
 
 start:
-    mov ax, 0x1000 
+    cli             ; Disable interrupts while setting up
+    xor ax, ax
+    mov ds, ax
     mov es, ax
-    mov bx, 0x0000
+    mov ss, ax
+    mov sp, 0x7C00  ; Temporary stack
 
-    mov ah, 0x02     
-    mov al, 1       
-    mov ch, 0       
-    mov cl, 2        
-    mov dh, 0       
-    mov dl, 0x80     
-    int 0x13
-    jc no_kernel    
+    ; Load the kernel (assume kernel.bin is at sector 2 on the disk)
+    mov ah, 0x02    ; BIOS read sector
+    mov al, 1       ; number of sectors to read at a time
+    mov ch, 0       ; cylinder
+    mov cl, 2       ; sector (kernel starts at sector 2)
+    mov dh, 0       ; head
+    mov dl, 0x80    ; drive (first HDD)
+    mov bx, 0x1000  ; ES:BX = 0x0000:0x1000, load kernel there
+    int 0x13        ; BIOS disk read
+    jc no_kernel    ; jump if error
 
-    jmp 0x1000:0000   
+    ; Jump to kernel entry point
+    jmp 0x1000:0000
 
+; -------------------------
 no_kernel:
     mov si, msg
-    call print_string
-
-    mov cx, 10
-countdown:
-    mov ah, 0x0E
-    mov al, '0'
-    add al, cl
-    int 0x10
-    mov al, '.'
-    int 0x10
-    mov al, '.'
-    int 0x10
-    mov al, '.'
-    int 0x10
-
-    call delay
-    loop countdown
-
-    cli
-    hlt
-
-print_string:
-    mov ah, 0x0E
-.next_char:
+print_loop:
     lodsb
     cmp al, 0
-    je .done
+    je halt_loop
+    mov ah, 0x0E
     int 0x10
-    jmp .next_char
-.done:
-    ret
+    jmp print_loop
 
-delay:
-    mov cx, 0xFFFF
-.wait:
-    loop .wait
-    ret
+halt_loop:
+    cli
+    hlt
+    jmp halt_loop
 
-msg db "OS not found. Shutting down in ", 0
+; -------------------------
+msg db "Kernel not found!", 0
 
-times 510 - ($ - $$) db 0
-dw 0xAA55
+; -------------------------
+; Fill remaining bytes up to 510
+times 510 - ($-$$) db 0
+dw 0xAA55            ; Boot sector signature
+
